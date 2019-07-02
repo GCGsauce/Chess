@@ -17,8 +17,8 @@ function love.mousepressed(x, y, button)
     getTileCoords(x, y, 0, 0)
 end
 
-function love.update()
-
+function love.update(dt)
+	cave:update(dt)
 end
 
 function love.draw()

@@ -7,7 +7,6 @@ function loadMaps()
 
 	for _, file in ipairs(tiled_maps) do
 		local f = file:sub(1, -5)
-		print("HI: "..f)
 		local map = require(f)
 		map.quads = generateQuads(map.tilesets[1].image:sub(4), map.tilesets[1].tilewidth, map.tilesets[1].tileheight) --gets the image path, the tile width and the tile height.
 		f = f:sub(12)
