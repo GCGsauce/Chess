@@ -26,6 +26,25 @@ function Map:new(map_data, x, y) --put in map data to get information about the 
     input:bind('left', 'PAN_LEFT')
     input:bind('down', 'PAN_DOWN')
     input:bind('up', 'PAN_UP')
+
+    local currXTile, currYTile = self:getTilePoint(self.camX, self.camY)
+    local xTopTileCoord, yTopTileCoord = self:getTileCoordinates(currXTile, currYTile)
+    local xDiff, yDiff = self.camX - xTopTileCoord, self.camY - yTopTileCoord
+ 
+    for y = 1, math.ceil(gh/self.tileheight)+1 do
+        for x = 1, math.ceil(gw/self.tilewidth)+1 do
+            --get the coordinate of the tile and find out if theres a corresponding quad.
+            local quadNum = self:getTileQuad(currXTile + (x-1), currYTile + (y-1))
+            if quadNum then
+                local a, b, c, d = unpack(self.quads[quadNum])
+                local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
+                --get the coordinates to display the tiles at 
+                local z, v = self.tilewidth*(x-1)-xDiff, self.tileheight*(y-1) - yDiff
+                print("Z: "..z.." V: "..v)
+                love.graphics.draw(self.image, quad, z, v)
+            end
+        end
+    end
 end
 
 function Map:update(dt) --moves the map 1 pixel per frame in any direction
@@ -67,34 +86,54 @@ end
 
 function Map:draw()	
     --get the position in terms of tiles with respect to the whole map of the top left portion of the camera, then render a full screen from there
-    local positionX, positionY = nil, nil
-    if self.smallerThanScreenWidth then positionX = self.positionX else positionX = self.camX end
-    if self.smallerThanScreenHeight then positionY = self.positionY else positionY = self.camY end
+    -- local positionX, positionY = nil, nil
+    -- if self.smallerThanScreenWidth then positionX = self.positionX else positionX = self.camX end
+    -- if self.smallerThanScreenHeight then positionY = self.positionY else positionY = self.camY end
 
-    local xTop, yTop = self:getTilePoint(positionX, positionY)
-    local width, height = nil, nil
+    -- local xTop, yTop = self:getTilePoint(positionX, positionY)
+    -- local width, height = nil, nil
 
-    if self.width*self.tilewidth >= gw then width = gw
-    else width = self.width*self.tilewidth end
-    if self.height*self.tileheight >= gh then height = gh
-    else height = self.height*self.tileheight end
+    -- if self.width*self.tilewidth >= gw then width = gw
+    -- else width = self.width*self.tilewidth end
+    -- if self.height*self.tileheight >= gh then height = gh
+    -- else height = self.height*self.tileheight end
 
-    local xBot, yBot = self:getTilePoint(positionX + width, positionY + height)
-    local xCoord, yCoord = self:getTileCoordinates(xTop, yTop)
-    local xDiff = positionX - xCoord --the coordinates may start rendering the top left tile from the middle
-    local yDiff = positionY - yCoord
+    -- local xBot, yBot = self:getTilePoint(positionX + width, positionY + height)
+    -- local xCoord, yCoord = self:getTileCoordinates(xTop, yTop)
+    -- local xDiff = positionX - xCoord --the coordinates may start rendering the top left tile from the middle
+    -- local yDiff = positionY - yCoord
 
     --only render the map that can be seen from the viewport, not the entire map
 
-    for y = yTop, yBot do
-        for x = xTop, xBot do
-            local quadNum = self:getTileQuad(x, y)
-            if quadNum ~= nil then 
+    -- for y = yTop, yBot do
+    --     for x = xTop, xBot do
+    --         local quadNum = self:getTileQuad(x, y)
+    --         if quadNum ~= nil then 
+    --             local a, b, c, d = unpack(self.quads[quadNum])
+    --             local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
+    --             local z, v = self:getTileCoordinates(x-xTop+1, y-yTop+1)
+    --             love.graphics.draw(self.image, quad, z - xDiff, v - yDiff)
+    --         end
+    --     end
+    -- end
+    
+    --gets the x and y coordinate location of the top tile (possibly different to the camera location)
+    local currXTile, currYTile = self:getTilePoint(self.camX, self.camY)
+    local xTopTileCoord, yTopTileCoord = self:getTileCoordinates(currXTile, currYTile)
+    local xDiff, yDiff = self.camX - xTopTileCoord, self.camY - yTopTileCoord
+
+    for y = 1, math.ceil(gh/self.tileheight)+1 do
+        for x = 1, math.ceil(gw/self.tilewidth)+1 do
+            --get the coordinate of the tile and find out if theres a corresponding quad.
+            local quadNum = self:getTileQuad(currXTile + (x-1), currYTile + (y-1))
+            if quadNum then
                 local a, b, c, d = unpack(self.quads[quadNum])
                 local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
-                local z, v = self:getTileCoordinates(x-xTop+1, y-yTop+1)
-                love.graphics.draw(self.image, quad, z - xDiff, v - yDiff)
+                --get the coordinates to display the tiles at 
+                local z, v = self.tilewidth*(x-1)-xDiff, self.tileheight*(y-1) - yDiff
+                love.graphics.draw(self.image, quad, z, v)
             end
         end
     end
+    
 end
