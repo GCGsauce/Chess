@@ -10,17 +10,11 @@ function love.load()
 	requireFiles(object_list)
 	
     raw_map_data = loadMaps()
-	cave = Map(raw_map_data["larger_map"], 32, 0)
+	cave = Map(raw_map_data["small_room"])
 end
 
 function love.mousepressed(x, y, button)
     getTileCoords(x, y, 0, 0)
-end
-
-function love.keypressed(key, u)
-	if key == '5' then
-		debug.debug()
-	end
 end
 
 function love.update(dt)
