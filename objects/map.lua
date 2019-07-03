@@ -3,7 +3,7 @@ require "constants"
 
 Map = Object:extend()
 
-function Map:new(map_data) --put in map data to get information about the map (table containing data about the map).	
+function Map:new(map_data, x, y) --put in map data to get information about the map (table containing data about the map).	
 
 	if map_data then -- copies all of the data from map_data and makes it a member of the "map" data table
 		for k, v in pairs(map_data) do
@@ -52,12 +52,24 @@ function Map:getTilePoint(x, y) --from coords of tile on x,y axis get the point 
     return xCoords, yCoords
 end
 
+function Map:goToAndCenter(x, y) --goes to the location upon which x,y is the central focal point of screen
+    self.camX = x - math.round(self.width/2)
+    self.camY = y - math.round(self.height/2)
+end
+
 function Map:draw()	
 
     --get the position in terms of tiles with respect to the whole map of the top left portion of the camera, then render a full screen from there
 
     local xTop, yTop = self:getTilePoint(self.camX, self.camY)
-    local xBot, yBot = self:getTilePoint(self.camX + gw, self.camY + gh)
+    local width, height = nil, nil
+
+    if self.width*self.tilewidth >= gw then width = gw
+    else width = self.width*self.tilewidth end
+    if self.height*self.tileheight >= gh then height = gh
+    else height = self.height*self.tileheight end
+
+    local xBot, yBot = self:getTilePoint(self.camX + width, self.camY + height)
     local xCoord, yCoord = self:getTileCoordinates(xTop, yTop)
     local xDiff = self.camX - xCoord --the coordinates may start rendering the top left tile from the middle
     local yDiff = self.camY - yCoord
@@ -66,10 +78,13 @@ function Map:draw()
 
     for y = yTop, yBot do
         for x = xTop, xBot do
-            local a, b, c, d = unpack(self.quads[self:getTileQuad(x, y)])
-            local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
-            local z, v = self:getTileCoordinates(x-xTop+1, y-yTop+1)
-            love.graphics.draw(self.image, quad, z - xDiff, v - yDiff)
+            local quadNum = self:getTileQuad(x, y)
+            if quadNum ~= nil then 
+                local a, b, c, d = unpack(self.quads[quadNum])
+                local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
+                local z, v = self:getTileCoordinates(x-xTop+1, y-yTop+1)
+                love.graphics.draw(self.image, quad, z - xDiff, v - yDiff)
+            end
         end
     end
 end

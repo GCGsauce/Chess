@@ -1,4 +1,3 @@
-
 function generateQuads(image_path, tile_width, tile_height) --generate quads for an image for a selected tile size, e.g. 32x32, 64,32
     local image = love.graphics.newImage(image_path)
 	local quadMap = {}
@@ -69,9 +68,6 @@ function getTileCoords(x, y, xTop, yTop, tSize, mapW, mapH)
 
     return xCoords, yCoords
 end
-
-
-
 
     
     
