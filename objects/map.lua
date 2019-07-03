@@ -4,15 +4,23 @@ require "constants"
 Map = Object:extend()
 
 function Map:new(map_data, x, y) --put in map data to get information about the map (table containing data about the map).	
+    
+    x = x or 0 -- position where the first tile is drawn to
+    y = y or 0
 
 	if map_data then -- copies all of the data from map_data and makes it a member of the "map" data table
 		for k, v in pairs(map_data) do
 			self[k] = v
 		end
-	end
+    end
+    
+    self.positionX = x
+    self.positionY = y
 	self.image = love.graphics.newImage(self.tilesets[1].image:sub(4))
-    self.camX = 0 --the coordinates of the current view of the screen relative to the map. this is the "camera"
-    self.camY = 0 --move camera only 1 pixel per second
+    self.camX = x --the coordinates of the current view of the screen relative to the map. this is the "camera"
+    self.camY = y
+    self.smallerThanScreenWidth = self.width*self.tilewidth < gw
+    self.smallerThanScreenHeight = self.height*self.tileheight < gh
 
     input:bind('right', 'PAN_RIGHT')
     input:bind('left', 'PAN_LEFT')
@@ -20,7 +28,7 @@ function Map:new(map_data, x, y) --put in map data to get information about the 
     input:bind('up', 'PAN_UP')
 end
 
-function Map:update(dt) --moves the map 1 pixel in any direction
+function Map:update(dt) --moves the map 1 pixel per frame in any direction
     if input:down('PAN_RIGHT') then  
         self.camX = self.camX + 1
         print(self.camX)
@@ -58,10 +66,12 @@ function Map:goToAndCenter(x, y) --goes to the location upon which x,y is the ce
 end
 
 function Map:draw()	
-
     --get the position in terms of tiles with respect to the whole map of the top left portion of the camera, then render a full screen from there
+    local positionX, positionY = nil, nil
+    if self.smallerThanScreenWidth then positionX = self.positionX else positionX = self.camX end
+    if self.smallerThanScreenHeight then positionY = self.positionY else positionY = self.camY end
 
-    local xTop, yTop = self:getTilePoint(self.camX, self.camY)
+    local xTop, yTop = self:getTilePoint(positionX, positionY)
     local width, height = nil, nil
 
     if self.width*self.tilewidth >= gw then width = gw
@@ -69,10 +79,10 @@ function Map:draw()
     if self.height*self.tileheight >= gh then height = gh
     else height = self.height*self.tileheight end
 
-    local xBot, yBot = self:getTilePoint(self.camX + width, self.camY + height)
+    local xBot, yBot = self:getTilePoint(positionX + width, positionY + height)
     local xCoord, yCoord = self:getTileCoordinates(xTop, yTop)
-    local xDiff = self.camX - xCoord --the coordinates may start rendering the top left tile from the middle
-    local yDiff = self.camY - yCoord
+    local xDiff = positionX - xCoord --the coordinates may start rendering the top left tile from the middle
+    local yDiff = positionY - yCoord
 
     --only render the map that can be seen from the viewport, not the entire map
 
