@@ -10,7 +10,7 @@ function love.load()
 	requireFiles(object_list)
 	
     raw_map_data = loadMaps()
-	cave = Map(raw_map_data["small_room"])
+	cave = Map(raw_map_data["small_room"], -20, 0)
 end
 
 function love.mousepressed(x, y, button)
