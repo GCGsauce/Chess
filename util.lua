@@ -14,6 +14,11 @@ function generateQuads(image_path, tile_width, tile_height) --generate quads for
 	return quadMap
 end
 
+function round(num, numDecimalPlaces) -- taken from http://lua-users.org/wiki/SimpleRound
+    local mult = 10^(numDecimalPlaces or 0)
+    return math.floor(num * mult + 0.5) / mult
+end  
+
 function recursiveEnumerate(folder, file_list)
     local items = love.filesystem.getDirectoryItems(folder)
     for _, item in ipairs(items) do
