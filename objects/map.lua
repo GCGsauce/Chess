@@ -17,8 +17,8 @@ function Map:new(map_data, x, y, camX, camY) --put in map data to get informatio
     self.positionX = x -- the position the map is being rendered to...
     self.positionY = y
 	self.image = love.graphics.newImage(self.tilesets[1].image:sub(4))
-    self.camX = 0 --the coordinates of the current view of the screen relative to the map. this is the "camera"
-    self.camY = 0
+    self.camX = camX --the coordinates of the current view of the screen relative to the map. this is the "camera"
+    self.camY = camY
     self.smallerThanScreenWidth = self.width*self.tilewidth < gw
     self.smallerThanScreenHeight = self.height*self.tileheight < gh
 
@@ -71,15 +71,29 @@ function Map:getTileQuad(x, y) -- x, y is the coordinates in tiles, return the n
 end
 
 function Map:getTileCoordinates(x, y) --x,y is the coordinate in tiles, return the coordinates along the x and y axis of the screen
-    return self.tilewidth*(x-1), self.tileheight*(y-1)
+    local xCoord, yCoord
+    --if x==0 or y == 0 then print("WHATSKFJ") end
+    if x == nil or y==nil then print("HALLWEO") end
+    if x >= 1 then xCoord = self.tilewidth*(x-1)
+    elseif x < 0 then xCoord = self.tilewidth*x end
+
+    if y >= 1 then yCoord = self.tileheight*(y-1)
+    elseif y < 0 then yCoord = self.tileheight*y end
+    return xCoord, yCoord
 end
 
 function Map:getTilePoint(x, y) --from coords of tile on x,y axis get the point in terms of number of tiles across each axis
-    local xCoords = nil
-    local yCoords = nil
+    local xCoords, yCoords
     
-    if x/self.tilewidth == self.width then xCoords = x/self.tilewidth else xCoords = math.floor(x/self.tilewidth)+1 end
-    if y/self.tileheight == self.height then yCoords = y/self.tileheight else yCoords = math.floor(y/self.tileheight)+1 end
+    if x > 0 then xCoords = math.ceil(x/self.tilewidth)
+    elseif x < 0 then xCoords = math.floor(x/self.tilewidth)
+    else xCoords = 1 end --x == 0
+
+    if y > 0 then yCoords = math.ceil(y/self.tileheight) 
+    elseif y < 0 then yCoords = math.floor(y/self.tileheight) 
+    else yCoords = 1 end
+    
+    if xCoords == 0 then print("X: "..x.." Y: "..y) end
     return xCoords, yCoords
 end
 
@@ -91,7 +105,8 @@ end
 function Map:draw()	   
     --gets the x and y coordinate location of the top tile (possibly different to the camera location)
     --only renders what's in the view, not necessarily the entire screen.
-    local currXTile, currYTile = self:getTilePoint(self.camX, self.camY)
+    local currXTile, currYTile = self:getTilePoint(self.camX, self.camY)    
+    print("CURRXTILE: "..currXTile.." CURRYTILE: "..currYTile)
     local xTopTileCoord, yTopTileCoord = self:getTileCoordinates(currXTile, currYTile)
     local xDiff, yDiff = self.camX - xTopTileCoord, self.camY - yTopTileCoord
 
@@ -103,7 +118,7 @@ function Map:draw()
                 local a, b, c, d = unpack(self.quads[quadNum])
                 local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
                 --get the coordinates to display the tiles at 
-                local z, v = (self.tilewidth*(x-1)-xDiff), (self.tileheight*(y-1) - yDiff)
+                local z, v = (self.tilewidth*(x-1)-xDiff) + self.positionX, (self.tileheight*(y-1) - yDiff) + self.positionY
                 love.graphics.draw(self.image, quad, z, v)
             end
         end
