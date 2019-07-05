@@ -26,9 +26,6 @@ function Map:new(map_data, x, y, camX, camY) --put in map data to get informatio
     input:bind('left', 'PAN_LEFT')
     input:bind('down', 'PAN_DOWN')
     input:bind('up', 'PAN_UP')
-    local a, b, c, d = unpack(self.quads[1])
-    print("HAZ: a: "..a.." b: "..b.." c: "..c.." d: "..d)
-
 end
 
 function Map:update(dt) --moves the map 2 pixels per frame in any direction
@@ -49,9 +46,13 @@ end
 function Map:getTileQuad(x, y) -- x, y is in cart coords, return the number of the quad associated with this tile 
     --must find the tile number of the position with respect to the map
     local tileX, tileY
-    if x-self.positionX == 0 then tileX = 1 else tileX = math.ceil((x - self.positionX)/self.tilewidth) end
-    if y-self.positionY == 0 then tileY = 1 else tileY = math.ceil((y - self.positionY)/self.tileheight) end
+    if x-self.positionX == self.width*self.tilewidth then tileX = math.floor((x - self.positionX)/self.tilewidth)
+    else tileX = math.floor((x - self.positionX)/self.tilewidth)+1 end
 
+    if y-self.positionY == self.height*self.tileheight then tileY = math.floor((y - self.positionY)/self.tileheight)
+    else tileY = math.floor((y - self.positionY)/self.tileheight)+1 end
+
+    print("TILEX: "..tileX.." TILEY: "..tileY)
     return self.layers[1].data[self.width*(tileY-1) + tileX]
 end
 
@@ -90,8 +91,8 @@ end
 
 --(x,y in cartesian coords) determine if position is within the boundaries of the calling map object
 function Map:positionInBounds(x, y) 
-    if x >= self.positionX and x <= self.positionX +(self.width*self.tilewidth) and y >= self.positionY
-    and y <= self.positionY+(self.height* self.tileheight) then return true
+    if x >= self.positionX and x <= self.positionX +((self.width-1)*self.tilewidth) and y >= self.positionY
+    and y <= self.positionY+((self.height-1) * self.tileheight) then return true
     else return false end
 end
 
@@ -108,49 +109,13 @@ function Map:draw()
             --only render if this position is within our map object
             if self:positionInBounds(positionX, positionY) then 
                 --determine which tile this position belongs to based on the position in the world 
+                print("POSX: "..positionX.."POSY: "..positionY)
                 local quadNum = self:getTileQuad(positionX, positionY)
-                print("HI "..quadNum)
-                print("WORSHIP "..unpack(self.quads[quadNum]))
                 local a, b, c, d = unpack(self.quads[quadNum])
-                print("a: "..a.." b: "..b.." c:"..c.." d: "..d)
                 local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
                 --get the coordinates to display the tiles at 
-                love.graphics.draw(self.image, quad, positionX, positionY)
+                love.graphics.draw(self.image, quad, positionX-self.camX, positionY-self.camY)
             end
         end
     end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--- local currCamXTile, currCamYTile = self:getTilePoint(self.camX, self.camY) 
---     local currPosXTile, currPosYTile = self:getTilePoint(self.positionX, self.positionY)   
---     local xTopTileCoord, yTopTileCoord = self:getTileCoordinates(currXTile, currYTile)
---     local xDiff, yDiff = self.camX - xTopTileCoord, self.camY - yTopTileCoord
-
---     for y = 1, math.ceil(gw/self.tilewidth)+1 do
---         for x = 1, math.ceil(gw/self.tilewidth)+1 do
---             --get the coordinate of the tile and find out if theres a corresponding quad.
---             local quadXTiles, quadYTiles
---             --local quadNum = self:getTileQuad((currCamXTile - ) + (x-1), currCamYTile + (y-1))
---             local quadNum = self:getTileQuad(x, y)
---             if quadNum then
---                 local a, b, c, d = unpack(self.quads[quadNum])
---                 local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
---                 --get the coordinates to display the tiles at 
---                 local z, v = (self.tilewidth*(x-1)-xDiff) + self.positionX, (self.tileheight*(y-1) - yDiff) + self.positionY
---                 love.graphics.draw(self.image, quad, z, v)
---             end
---         end
---     end
