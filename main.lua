@@ -4,6 +4,7 @@ require("util")
 require("AssetLoader")
 
 function love.load()
+    if arg[#arg] == "-debug" then require("mobdebug").start() end
 	input = Input()
 	local object_list = {}
 	recursiveEnumerate('objects', object_list)

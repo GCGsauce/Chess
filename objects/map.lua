@@ -26,28 +26,9 @@ function Map:new(map_data, x, y, camX, camY) --put in map data to get informatio
     input:bind('left', 'PAN_LEFT')
     input:bind('down', 'PAN_DOWN')
     input:bind('up', 'PAN_UP')
+    local a, b, c, d = unpack(self.quads[1])
+    print("HAZ: a: "..a.." b: "..b.." c: "..c.." d: "..d)
 
-    -- local currXTile, currYTile = self:getTilePoint(self.camX, self.camY)
-    -- local xTopTileCoord, yTopTileCoord = self:getTileCoordinates(currXTile, currYTile)
-    -- local xDiff, yDiff = self.camX - xTopTileCoord, self.camY - yTopTileCoord
-    -- print("currXTile: "..currXTile.." currYTile: "..currYTile)
-    -- for y = 1, math.ceil(gw/self.tilewidth)+1 do
-    --     for x = 1, math.ceil(gw/self.tilewidth)+1 do
-    --         --get the coordinate of the tile and find out if theres a corresponding quad.
-    --         print("GETTILEQUAD: "..currXTile + (x-1))
-    --         local quadNum = self:getTileQuad(currXTile + (x-1), currYTile + (y-1))  
-    --         if quadNum then
-    --             print("XMEN: "..x.." YMEN: "..y.."\n")
-    --             local a, b, c, d = unpack(self.quads[quadNum])
-    --             local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
-    --             --get the coordinates to display the tiles at 
-    --             local z, v = self.tilewidth*(x-1)-xDiff, self.tileheight*(y-1) - yDiff
-    --             love.graphics.draw(self.image, quad, z, v)
-    --         else print("X: "..x.." Y: "..y.."\n") end
-    --     end
-    -- end
-
-    --self:goToAndCenter(self.camX, self.camY)
 end
 
 function Map:update(dt) --moves the map 2 pixels per frame in any direction
@@ -65,15 +46,20 @@ function Map:update(dt) --moves the map 2 pixels per frame in any direction
     end
 end
 
-function Map:getTileQuad(x, y) -- x, y is the coordinates in tiles, return the number of the quad associated with this tile 
-    if x >= 1 and y >= 1 and x <= self.width and y <= self.height then
-        return self.layers[1].data[self.width*(y-1) + x] end-- account for array starting at 1
+function Map:getTileQuad(x, y) -- x, y is in cart coords, return the number of the quad associated with this tile 
+    --must find the tile number of the position with respect to the map
+    local tileX, tileY
+    if x-self.positionX == 0 then tileX = 1 else tileX = math.ceil((x - self.positionX)/self.tilewidth) end
+    if y-self.positionY == 0 then tileY = 1 else tileY = math.ceil((y - self.positionY)/self.tileheight) end
+
+    return self.layers[1].data[self.width*(tileY-1) + tileX]
 end
 
 function Map:getTileCoordinates(x, y) --x,y is the coordinate in tiles, return the coordinates along the x and y axis of the screen
     local xCoord, yCoord
     --if x==0 or y == 0 then print("WHATSKFJ") end
     if x == nil or y==nil then print("HALLWEO") end
+
     if x >= 1 then xCoord = self.tilewidth*(x-1)
     elseif x < 0 then xCoord = self.tilewidth*x end
 
@@ -102,25 +88,69 @@ function Map:goToAndCenter(x, y) --goes to the location upon which x,y is the ce
     self.camY = y - (gh - (self.height*self.tileheight))/2
 end
 
+--(x,y in cartesian coords) determine if position is within the boundaries of the calling map object
+function Map:positionInBounds(x, y) 
+    if x >= self.positionX and x <= self.positionX +(self.width*self.tilewidth) and y >= self.positionY
+    and y <= self.positionY+(self.height* self.tileheight) then return true
+    else return false end
+end
+
 function Map:draw()	   
-    --gets the x and y coordinate location of the top tile (possibly different to the camera location)
-    --only renders what's in the view, not necessarily the entire screen.
+    --x, y is the number of tiles across/down the map
+    --find the renderable map area within the viewport
     local currXTile, currYTile = self:getTilePoint(self.camX, self.camY)    
-    print("CURRXTILE: "..currXTile.." CURRYTILE: "..currYTile)
     local xTopTileCoord, yTopTileCoord = self:getTileCoordinates(currXTile, currYTile)
     local xDiff, yDiff = self.camX - xTopTileCoord, self.camY - yTopTileCoord
 
-    for y = 1, math.ceil(gw/self.tilewidth)+1 do
-        for x = 1, math.ceil(gw/self.tilewidth)+1 do
-            --get the coordinate of the tile and find out if theres a corresponding quad.
-            local quadNum = self:getTileQuad(currXTile + (x-1), currYTile + (y-1))
-            if quadNum then
+    for y = 1, math.ceil(gw/self.tilewidth) do 
+        for x = 1, math.ceil(gh/self.tileheight) do
+            local positionX, positionY = self.camX + (self.tilewidth*(x-1)), self.camY + (self.tileheight*(y-1))
+            --only render if this position is within our map object
+            if self:positionInBounds(positionX, positionY) then 
+                --determine which tile this position belongs to based on the position in the world 
+                local quadNum = self:getTileQuad(positionX, positionY)
+                print("HI "..quadNum)
+                print("WORSHIP "..unpack(self.quads[quadNum]))
                 local a, b, c, d = unpack(self.quads[quadNum])
+                print("a: "..a.." b: "..b.." c:"..c.." d: "..d)
                 local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
                 --get the coordinates to display the tiles at 
-                local z, v = (self.tilewidth*(x-1)-xDiff) + self.positionX, (self.tileheight*(y-1) - yDiff) + self.positionY
-                love.graphics.draw(self.image, quad, z, v)
+                love.graphics.draw(self.image, quad, positionX, positionY)
             end
         end
     end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- local currCamXTile, currCamYTile = self:getTilePoint(self.camX, self.camY) 
+--     local currPosXTile, currPosYTile = self:getTilePoint(self.positionX, self.positionY)   
+--     local xTopTileCoord, yTopTileCoord = self:getTileCoordinates(currXTile, currYTile)
+--     local xDiff, yDiff = self.camX - xTopTileCoord, self.camY - yTopTileCoord
+
+--     for y = 1, math.ceil(gw/self.tilewidth)+1 do
+--         for x = 1, math.ceil(gw/self.tilewidth)+1 do
+--             --get the coordinate of the tile and find out if theres a corresponding quad.
+--             local quadXTiles, quadYTiles
+--             --local quadNum = self:getTileQuad((currCamXTile - ) + (x-1), currCamYTile + (y-1))
+--             local quadNum = self:getTileQuad(x, y)
+--             if quadNum then
+--                 local a, b, c, d = unpack(self.quads[quadNum])
+--                 local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
+--                 --get the coordinates to display the tiles at 
+--                 local z, v = (self.tilewidth*(x-1)-xDiff) + self.positionX, (self.tileheight*(y-1) - yDiff) + self.positionY
+--                 love.graphics.draw(self.image, quad, z, v)
+--             end
+--         end
+--     end
