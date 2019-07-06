@@ -55,32 +55,6 @@ function Map:getTileQuad(x, y) -- x, y is in cart coords, return the number of t
     return self.layers[1].data[self.width*(tileY-1) + tileX]
 end
 
-function Map:getTileCoordinates(x, y) --x,y is the coordinate in tiles, return the coordinates along the x and y axis of the screen
-    local xCoord, yCoord
-
-    if x >= 1 then xCoord = self.tilewidth*(x-1)
-    elseif x < 0 then xCoord = self.tilewidth*x end
-
-    if y >= 1 then yCoord = self.tileheight*(y-1)
-    elseif y < 0 then yCoord = self.tileheight*y end
-    return xCoord, yCoord
-end
-
-function Map:getTilePoint(x, y) --from coords of tile on x,y axis get the point in terms of number of tiles across each axis
-    local xCoords, yCoords
-    
-    if x > 0 then xCoords = math.ceil(x/self.tilewidth)
-    elseif x < 0 then xCoords = math.floor(x/self.tilewidth)
-    else xCoords = 1 end --x == 0
-
-    if y > 0 then yCoords = math.ceil(y/self.tileheight) 
-    elseif y < 0 then yCoords = math.floor(y/self.tileheight) 
-    else yCoords = 1 end
-    
-    if xCoords == 0 then print("X: "..x.." Y: "..y) end
-    return xCoords, yCoords
-end
-
 function Map:goToAndCenter(x, y) --goes to the location upon which x,y is the central focal point of screen
     self.camX = x - (gw - (self.width*self.tilewidth))/2
     self.camY = y - (gh - (self.height*self.tileheight))/2
