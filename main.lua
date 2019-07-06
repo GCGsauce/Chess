@@ -3,6 +3,9 @@ Input  = require 'libraries/boipushy-master/Input'
 require("util")
 require("AssetLoader")
 
+local time = 0
+local fpsCount = 0
+
 function love.load()
     if arg[#arg] == "-debug" then require("mobdebug").start() end
 	input = Input()
@@ -11,7 +14,7 @@ function love.load()
 	requireFiles(object_list)
 	
     raw_map_data = loadMaps()
-	cave = Map(raw_map_data["small_room"], 50, 50, 80, 80)
+	cave = Map(raw_map_data["larger_map"], 50, 50, 50, 50)
 end
 
 function love.mousepressed(x, y, button)
@@ -19,6 +22,9 @@ function love.mousepressed(x, y, button)
 end
 
 function love.update(dt)
+	-- if time + dt >= 1.0 then print(fpsCount)
+	-- else time = time + dt fpsCount = fpsCount+1 end
+	print(love.timer.getFPS())
 	cave:update(dt)
 end
 

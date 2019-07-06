@@ -19,7 +19,7 @@ function Map:new(map_data, x, y, camX, camY) --put in map data to get informatio
 	self.image = love.graphics.newImage(self.tilesets[1].image:sub(4))
     self.camX = camX --the coordinates of the current view of the screen relative to the map. this is the "camera"
     self.camY = camY
-    self.tileScreenWidth = math.ceil(gw/self.tilewidth)
+    self.tileScreenWidth = math.ceil(gw/self.tilewidth) --width of the screen in tile map size
     self.tileScreenHeight = math.ceil(gh/self.tileheight)
 
     input:bind('right', 'PAN_RIGHT')
@@ -31,7 +31,7 @@ end
 function Map:update(dt) --moves the map 2 pixels per frame in any direction
     if input:down('PAN_RIGHT') then  
         self.camX = self.camX + 2
-        print(self.camX)
+        --print(self.camX)
     elseif input:down('PAN_LEFT') then
         self.camX = self.camX - 2
     end
@@ -108,10 +108,11 @@ function Map:draw()
 
         for y = firstY, loopToY do
             for x = firstX, loopToX do
-                print("X: "..x.." Y: "..y)
+                --print("X: "..x.." Y: "..y)
                 local positionX, positionY = self.camX + ((x-1)*self.tilewidth), self.camY + ((y-1)*self.tileheight)
-                print("POSX: "..positionX.." POSY: "..positionY)
+                --print("POSX: "..positionX.." POSY: "..positionY)
                 local quadNum = self:getTileQuad(positionX, positionY)
+                print("QUADNUM: "..quadNum)
                 local a, b, c, d = unpack(self.quads[quadNum])
                 local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
                 love.graphics.draw(self.image, quad, positionX-self.camX, positionY-self.camY)
