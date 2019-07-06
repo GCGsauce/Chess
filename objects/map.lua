@@ -30,16 +30,16 @@ end
 
 function Map:update(dt) --moves the map 2 pixels per frame in any direction
     if input:down('PAN_RIGHT') then  
-        self.camX = self.camX + 2
+        self.camX = self.camX + 2 * 60 * dt
         --print(self.camX)
     elseif input:down('PAN_LEFT') then
-        self.camX = self.camX - 2
+        self.camX = self.camX - 2 * 60 * dt
     end
 
     if input:down('PAN_UP') then 
-        self.camY = self.camY - 2
+        self.camY = self.camY - 2 * 60 * dt
     elseif input:down('PAN_DOWN') then
-        self.camY = self.camY + 2
+        self.camY = self.camY + 2 * 60 * dt
     end
 end
 
@@ -86,7 +86,7 @@ function Map:draw()
                 local positionX, positionY = self.camX + ((x-1)*self.tilewidth), self.camY + ((y-1)*self.tileheight)
                 --print("POSX: "..positionX.." POSY: "..positionY)
                 local quadNum = self:getTileQuad(positionX, positionY)
-                print("QUADNUM: "..quadNum)
+                --print("QUADNUM: "..quadNum)
                 local a, b, c, d = unpack(self.quads[quadNum])
                 local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
                 love.graphics.draw(self.image, quad, positionX-self.camX, positionY-self.camY)

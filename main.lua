@@ -3,9 +3,6 @@ Input  = require 'libraries/boipushy-master/Input'
 require("util")
 require("AssetLoader")
 
-local time = 0
-local fpsCount = 0
-
 function love.load()
     if arg[#arg] == "-debug" then require("mobdebug").start() end
 	input = Input()
@@ -22,12 +19,10 @@ function love.mousepressed(x, y, button)
 end
 
 function love.update(dt)
-	-- if time + dt >= 1.0 then print(fpsCount)
-	-- else time = time + dt fpsCount = fpsCount+1 end
-	print(love.timer.getFPS())
 	cave:update(dt)
 end
 
-function love.draw()
+function love.draw()	
+	print(love.timer.getFPS())
 	cave:draw()
 end
