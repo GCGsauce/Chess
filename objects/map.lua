@@ -19,8 +19,8 @@ function Map:new(map_data, x, y, camX, camY) --put in map data to get informatio
 	self.image = love.graphics.newImage(self.tilesets[1].image:sub(4))
     self.camX = camX --the coordinates of the current view of the screen relative to the map. this is the "camera"
     self.camY = camY
-    self.smallerThanScreenWidth = self.width*self.tilewidth < gw
-    self.smallerThanScreenHeight = self.height*self.tileheight < gh
+    self.tileScreenWidth = math.ceil(gw/self.tilewidth)
+    self.tileScreenHeight = math.ceil(gh/self.tileheight)
 
     input:bind('right', 'PAN_RIGHT')
     input:bind('left', 'PAN_LEFT')
@@ -46,20 +46,17 @@ end
 function Map:getTileQuad(x, y) -- x, y is in cart coords, return the number of the quad associated with this tile 
     --must find the tile number of the position with respect to the map
     local tileX, tileY
-    if x-self.positionX == self.width*self.tilewidth then tileX = math.floor((x - self.positionX)/self.tilewidth)
+    if x-self.positionX == self.width*self.tilewidth then tileX = self.width
     else tileX = math.floor((x - self.positionX)/self.tilewidth)+1 end
 
-    if y-self.positionY == self.height*self.tileheight then tileY = math.floor((y - self.positionY)/self.tileheight)
+    if y-self.positionY == self.height*self.tileheight then tileY = self.height
     else tileY = math.floor((y - self.positionY)/self.tileheight)+1 end
 
-    print("TILEX: "..tileX.." TILEY: "..tileY)
     return self.layers[1].data[self.width*(tileY-1) + tileX]
 end
 
 function Map:getTileCoordinates(x, y) --x,y is the coordinate in tiles, return the coordinates along the x and y axis of the screen
     local xCoord, yCoord
-    --if x==0 or y == 0 then print("WHATSKFJ") end
-    if x == nil or y==nil then print("HALLWEO") end
 
     if x >= 1 then xCoord = self.tilewidth*(x-1)
     elseif x < 0 then xCoord = self.tilewidth*x end
@@ -97,23 +94,26 @@ function Map:positionInBounds(x, y)
 end
 
 function Map:draw()	   
-    --x, y is the number of tiles across/down the map
-    --find the renderable map area within the viewport
-    local currXTile, currYTile = self:getTilePoint(self.camX, self.camY)    
-    local xTopTileCoord, yTopTileCoord = self:getTileCoordinates(currXTile, currYTile)
-    local xDiff, yDiff = self.camX - xTopTileCoord, self.camY - yTopTileCoord
 
-    for y = 1, math.ceil(gw/self.tilewidth) do 
-        for x = 1, math.ceil(gh/self.tileheight) do
-            local positionX, positionY = self.camX + (self.tilewidth*(x-1)), self.camY + (self.tileheight*(y-1))
-            --only render if this position is within our map object
-            if self:positionInBounds(positionX, positionY) then 
-                --determine which tile this position belongs to based on the position in the world 
-                print("POSX: "..positionX.."POSY: "..positionY)
+    --calculate first x and y tile that is within the viewable viewport if one exists
+    local firstX, firstY = math.ceil((self.positionX - self.camX)/self.tilewidth)+1, math.ceil((self.positionY - self.camY)/self.tileheight)+1
+    local loopToX, loopToY
+
+    if self:positionInBounds(self.camX + ((firstX-1)*self.tilewidth), self.camY + ((firstY-1)*self.tileheight)) then
+        --configure loopToX so that it only draws the visible portion of the map within the viewport
+        if firstX+self.width-1 > self.tileScreenWidth then loopToX = self.tileScreenWidth
+        else loopToX = firstX+self.width-1 end
+        if firstY+self.height-1 > self.tileScreenHeight then loopToY = self.tileScreenHeight 
+        else loopToY = firstY+self.width-1 end
+
+        for y = firstY, loopToY do
+            for x = firstX, loopToX do
+                print("X: "..x.." Y: "..y)
+                local positionX, positionY = self.camX + ((x-1)*self.tilewidth), self.camY + ((y-1)*self.tileheight)
+                print("POSX: "..positionX.." POSY: "..positionY)
                 local quadNum = self:getTileQuad(positionX, positionY)
                 local a, b, c, d = unpack(self.quads[quadNum])
                 local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
-                --get the coordinates to display the tiles at 
                 love.graphics.draw(self.image, quad, positionX-self.camX, positionY-self.camY)
             end
         end
