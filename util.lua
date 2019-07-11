@@ -19,6 +19,10 @@ function round(num, numDecimalPlaces) -- taken from http://lua-users.org/wiki/Si
     return math.floor(num * mult + 0.5) / mult
 end  
 
+function abs(num)
+    if num < 0 then return num*-1 else return num end
+end
+
 function recursiveEnumerate(folder, file_list)
     local items = love.filesystem.getDirectoryItems(folder)
     for _, item in ipairs(items) do

@@ -19,8 +19,8 @@ function Map:new(map_data, x, y, camX, camY) --put in map data to get informatio
 	self.image = love.graphics.newImage(self.tilesets[1].image:sub(4))
     self.camX = camX --the coordinates of the current view of the screen relative to the map. this is the "camera"
     self.camY = camY
-    self.tileScreenWidth = math.ceil(gw/self.tilewidth) --width of the screen in tile map size
-    self.tileScreenHeight = math.ceil(gh/self.tileheight)
+    self.widthInPixels = self.tilewidth*self.width
+    self.heightInPixels = self.tileheight*self.height
 
     input:bind('right', 'PAN_RIGHT')
     input:bind('left', 'PAN_LEFT')
@@ -30,16 +30,15 @@ end
 
 function Map:update(dt) --moves the map 2 pixels per frame in any direction
     if input:down('PAN_RIGHT') then  
-        self.camX = self.camX + 2 * 60 * dt
-        --print(self.camX)
+        self.camX = self.camX + 2
     elseif input:down('PAN_LEFT') then
-        self.camX = self.camX - 2 * 60 * dt
+        self.camX = self.camX - 2
     end
 
     if input:down('PAN_UP') then 
-        self.camY = self.camY - 2 * 60 * dt
+        self.camY = self.camY - 2
     elseif input:down('PAN_DOWN') then
-        self.camY = self.camY + 2 * 60 * dt
+        self.camY = self.camY + 2
     end
 end
 
@@ -67,30 +66,62 @@ function Map:positionInBounds(x, y)
     else return false end
 end
 
+function Map:move()
+    self.camX = self.camX+2
+end
+
 function Map:draw()	   
+    --get the starting cartesian coordinates of the first tile that can be seen on the screen
+    local xOffset, yOffset = 0, 0 -- tile might need to be rendered a bit off-screen, need to apply offset
+    local xCoord, yCoord --coordinates of the top left tile to be rendered
 
-    --calculate first x and y tile that is within the viewable viewport if one exists
-    local firstX, firstY = math.ceil((self.positionX - self.camX)/self.tilewidth)+1, math.ceil((self.positionY - self.camY)/self.tileheight)+1
-    local loopToX, loopToY
+    --print("SELF.CAMX: "..self.camX.." SELF.CAMY: "..self.camY)
+    --condition where the top left tile of the camera still lies inside the map's confines
+    if self.camX >= self.positionX and self.camX < self.positionX+(2*self.widthInPixels) then 
+        xCoord = self.camX
+        if self.camX ~= self.positionX then xOffset = abs(self.camX-self.positionX) % self.tilewidth end
+    elseif self.camX > self.positionX-gw then
+        xCoord = self.positionX
+    else return nil end
 
-    if self:positionInBounds(self.camX + ((firstX-1)*self.tilewidth), self.camY + ((firstY-1)*self.tileheight)) then
-        --configure loopToX so that it only draws the visible portion of the map within the viewport
-        if firstX+self.width-1 > self.tileScreenWidth then loopToX = self.tileScreenWidth
-        else loopToX = firstX+self.width-1 end
-        if firstY+self.height-1 > self.tileScreenHeight then loopToY = self.tileScreenHeight 
-        else loopToY = firstY+self.width-1 end
+    if self.camY >= self.positionY and self.camY < self.camY+(2*self.heightInPixels) then
+        yCoord = self.camY
+        if self.camY ~= self.positionY then yOffset = abs(self.camY-self.positionY) % self.tileheight end
+    elseif self.camY > self.positionY-gh then
+        yCoord = self.positionY
+    else return nil end
+    
+    local loopToX, loopToY --coordinates we loop towards
+    if self.camX + gw > self.positionX + self.widthInPixels then
+        loopToX = self.positionX+self.widthInPixels
+        if xOffset == 0 then loopToX = loopToX-self.tilewidth end
+    else loopToX = self.camX+gw end
 
-        for y = firstY, loopToY do
-            for x = firstX, loopToX do
-                --print("X: "..x.." Y: "..y)
-                local positionX, positionY = self.camX + ((x-1)*self.tilewidth), self.camY + ((y-1)*self.tileheight)
-                --print("POSX: "..positionX.." POSY: "..positionY)
-                local quadNum = self:getTileQuad(positionX, positionY)
-                --print("QUADNUM: "..quadNum)
-                local a, b, c, d = unpack(self.quads[quadNum])
-                local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
-                love.graphics.draw(self.image, quad, positionX-self.camX, positionY-self.camY)
-            end
+    if self.camY + gh > self.positionY + self.heightInPixels then
+        loopToY = self.positionY+self.heightInPixels
+        if yOffset == 0 then loopToY = loopToY-self.tileheight end
+    else loopToY = self.camY+gh end
+
+    --print("LOOPTOX: "..loopToX.." LOOPTOY: "..loopToY)
+    --print("XOFFSET "..xOffset.." YOFFSET: "..yOffset)
+
+    local xCount, yCount = 1, 1 --counts the number of tiles we go down/across 
+
+    for y = yCoord, loopToY, self.tileheight do 
+        for x = xCoord, loopToX, self.tilewidth do 
+            local quadNum = self:getTileQuad(x, y)
+            local a, b, c, d = unpack(self.quads[quadNum])
+            local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
+            --print("X: "..x.." Y: "..y)
+            local xDraw, yDraw
+            
+            if self.camX < self.positionX then xDraw = (x-self.camX) else xDraw = -xOffset+((xCount-1)*self.tilewidth) end
+            if self.camY < self.positionY then yDraw = (y-self.camY) else yDraw = -yOffset+((yCount-1)*self.tileheight) end
+            
+            love.graphics.draw(self.image, quad, xDraw, yDraw)
+            xCount = xCount+1
         end
+        xCount = 1
+        yCount = yCount+1
     end
 end

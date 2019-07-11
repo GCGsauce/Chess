@@ -11,7 +11,7 @@ function love.load()
 	requireFiles(object_list)
 	
     raw_map_data = loadMaps()
-	cave = Map(raw_map_data["larger_map"], 50, 50, 50, 50)
+	cave = Map(raw_map_data["larger_map"], 16, 16, 16, -53) --181, -53
 end
 
 function love.mousepressed(x, y, button)
@@ -23,6 +23,10 @@ function love.update(dt)
 end
 
 function love.draw()	
-	print(love.timer.getFPS())
+	--print(love.timer.getFPS())
 	cave:draw()
+	-- local image = love.graphics.newImage("rpg_indoor.png")
+	-- love.graphics.translate(-10,-10) --when positive numbers are entered - coords still start at 0,0 but
+	-- 								--scaled so that drawing at 0,0 draws at 20,20.
+    -- love.graphics.draw(image, 0, 0)
 end
