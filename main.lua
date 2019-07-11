@@ -11,7 +11,7 @@ function love.load()
 	requireFiles(object_list)
 	
     raw_map_data = loadMaps()
-	cave = Map(raw_map_data["larger_map"], 16, 16, 16, -53) --181, -53
+	cave = Map(raw_map_data["grass_map"], 16, 16, 16, -53) --181, -53
 end
 
 function love.mousepressed(x, y, button)

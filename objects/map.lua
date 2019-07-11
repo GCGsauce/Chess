@@ -59,13 +59,6 @@ function Map:goToAndCenter(x, y) --goes to the location upon which x,y is the ce
     self.camY = y - (gh - (self.height*self.tileheight))/2
 end
 
---(x,y in cartesian coords) determine if position is within the boundaries of the calling map object
-function Map:positionInBounds(x, y) 
-    if x >= self.positionX and x <= self.positionX +((self.width-1)*self.tilewidth) and y >= self.positionY
-    and y <= self.positionY+((self.height-1) * self.tileheight) then return true
-    else return false end
-end
-
 function Map:move()
     self.camX = self.camX+2
 end
