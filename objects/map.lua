@@ -1,24 +1,20 @@
 require "util"
 require "constants"
 
-Map = Object:extend()
+Map = Entity:extend()
 
 function Map:new(map_data, x, y, camX, camY) --put in map data to get information about the map (table containing data about the map).	  
-    x = x or 0 -- position where the first tile is drawn to
-    y = y or 0
-    camX = camX or 0
-    camY = camY or 0
+    Map.super.new(self, x, y)
+
 	if map_data then -- copies all of the data from map_data and makes it a member of the "map" data table
 		for k, v in pairs(map_data) do
 			self[k] = v
 		end
     end
-    
-    self.positionX = x -- the position the map is being rendered to...
-    self.positionY = y
+
 	self.image = love.graphics.newImage(self.tilesets[1].image:sub(4))
-    self.camX = camX --the coordinates of the current view of the screen relative to the map. this is the "camera"
-    self.camY = camY
+    self.camX = camX or 0 --the coordinates of the current view of the screen relative to the map. this is the "camera"
+    self.camY = camY or 0
     self.widthInPixels = self.tilewidth*self.width
     self.heightInPixels = self.tileheight*self.height
 
@@ -30,15 +26,15 @@ end
 
 function Map:update(dt) --moves the map 2 pixels per frame in any direction
     if input:down('PAN_RIGHT') then  
-        self.camX = self.camX + 2
+        self.camX = self.camX + 2 * 60 * dt
     elseif input:down('PAN_LEFT') then
-        self.camX = self.camX - 2
+        self.camX = self.camX - 2 * 60 * dt
     end
 
     if input:down('PAN_UP') then 
-        self.camY = self.camY - 2
+        self.camY = self.camY - 2 * 60 * dt
     elseif input:down('PAN_DOWN') then
-        self.camY = self.camY + 2
+        self.camY = self.camY + 2 * 60 * dt
     end
 end
 
@@ -59,16 +55,11 @@ function Map:goToAndCenter(x, y) --goes to the location upon which x,y is the ce
     self.camY = y - (gh - (self.height*self.tileheight))/2
 end
 
-function Map:move()
-    self.camX = self.camX+2
-end
-
 function Map:draw()	   
     --get the starting cartesian coordinates of the first tile that can be seen on the screen
     local xOffset, yOffset = 0, 0 -- tile might need to be rendered a bit off-screen, need to apply offset
     local xCoord, yCoord --coordinates of the top left tile to be rendered
 
-    --print("SELF.CAMX: "..self.camX.." SELF.CAMY: "..self.camY)
     --condition where the top left tile of the camera still lies inside the map's confines
     if self.camX >= self.positionX and self.camX < self.positionX+(2*self.widthInPixels) then 
         xCoord = self.camX
@@ -95,9 +86,6 @@ function Map:draw()
         if yOffset == 0 then loopToY = loopToY-self.tileheight end
     else loopToY = self.camY+gh end
 
-    --print("LOOPTOX: "..loopToX.." LOOPTOY: "..loopToY)
-    --print("XOFFSET "..xOffset.." YOFFSET: "..yOffset)
-
     local xCount, yCount = 1, 1 --counts the number of tiles we go down/across 
 
     for y = yCoord, loopToY, self.tileheight do 
@@ -105,7 +93,6 @@ function Map:draw()
             local quadNum = self:getTileQuad(x, y)
             local a, b, c, d = unpack(self.quads[quadNum])
             local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
-            --print("X: "..x.." Y: "..y)
             local xDraw, yDraw
             
             if self.camX < self.positionX then xDraw = (x-self.camX) else xDraw = -xOffset+((xCount-1)*self.tilewidth) end
