@@ -1,22 +1,31 @@
 Object = require 'libraries.classic-master.classic'
 Input  = require 'libraries.boipushy-master.Input'
+Entity = require 'objects.Entity'
+
 require("util")
 require("AssetLoader")
 
+local object_list = {}
+recursiveEnumerate('objects', object_list)
+requireFiles(object_list)
+
+MAP_DATA 	= loadMaps() -- loads all data about maps
+INPUT 		= Input()
+GAME_CAMERA = Camera()
+PROTAGONIST = Player()
+CURRENT_MAP = Map(MAP_DATA["cave"]) -- start in a cave
+
 function love.load()
-	input = Input()
-	local object_list = {}
-	recursiveEnumerate('objects', object_list)
-	requireFiles(object_list)
-	
-    raw_map_data = loadMaps()
-	cave = Map(raw_map_data["grass_map"], 16, 16, 16, -53) 
+	GAME_CAMERA:follow(PROTAGONIST)
 end
 
 function love.update(dt)
-	cave:update(dt)
+	CURRENT_MAP:update(dt)
+	PROTAGONIST:update(dt)
+	GAME_CAMERA:update(dt)
 end
 
 function love.draw()	
-	cave:draw()
+	CURRENT_MAP:draw()
+	PROTAGONIST:draw()
 end

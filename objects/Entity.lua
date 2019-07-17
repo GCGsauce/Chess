@@ -1,5 +1,8 @@
 
-Entity = Object:extend()
+local Entity = Object:extend()
+
+function Entity:new()
+end
 
 function Entity:new(x, y)
     self.positionX = x or 0
@@ -7,13 +10,15 @@ function Entity:new(x, y)
 end
 
 function Entity:getPosition()
-    return self.positionX, self.positionY
+    if self.positionX and self.positionY then return self.positionX, self.positionY end
 end
 
 function Entity:getpositionX()
-    return self.positionX
+    if self.positionX then return self.positionX end
 end
 
 function Entity:getpositionY()
-    return self.positionY
+    if self.positionY then return self.positionY end
 end
+
+return Entity

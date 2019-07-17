@@ -3,7 +3,7 @@ require "constants"
 
 Map = Entity:extend()
 
-function Map:new(map_data, x, y, camX, camY) --put in map data to get information about the map (table containing data about the map).	  
+function Map:new(map_data, x, y, camX, camY, deadzones) --put in map data to get information about the map (table containing data about the map).	  
     Map.super.new(self, x, y)
 
 	if map_data then -- copies all of the data from map_data and makes it a member of the "map" data table
@@ -11,31 +11,16 @@ function Map:new(map_data, x, y, camX, camY) --put in map data to get informatio
 			self[k] = v
 		end
     end
-
+    
 	self.image = love.graphics.newImage(self.tilesets[1].image:sub(4))
     self.camX = camX or 0 --the coordinates of the current view of the screen relative to the map. this is the "camera"
     self.camY = camY or 0
     self.widthInPixels = self.tilewidth*self.width
     self.heightInPixels = self.tileheight*self.height
-
-    input:bind('right', 'PAN_RIGHT')
-    input:bind('left', 'PAN_LEFT')
-    input:bind('down', 'PAN_DOWN')
-    input:bind('up', 'PAN_UP')
+    self.deadzones = deadzones or {}
 end
 
 function Map:update(dt) --moves the map 2 pixels per frame in any direction
-    if input:down('PAN_RIGHT') then  
-        self.camX = self.camX + 2 * 60 * dt
-    elseif input:down('PAN_LEFT') then
-        self.camX = self.camX - 2 * 60 * dt
-    end
-
-    if input:down('PAN_UP') then 
-        self.camY = self.camY - 2 * 60 * dt
-    elseif input:down('PAN_DOWN') then
-        self.camY = self.camY + 2 * 60 * dt
-    end
 end
 
 function Map:getTileQuad(x, y) -- x, y is in cart coords, return the number of the quad associated with this tile 
@@ -53,6 +38,14 @@ end
 function Map:goToAndCenter(x, y) --goes to the location upon which x,y is the central focal point of screen
     self.camX = x - (gw - (self.width*self.tilewidth))/2
     self.camY = y - (gh - (self.height*self.tileheight))/2
+end
+
+function Map:addDeadzones(x, y, width, height)
+    table.insert(self.deadzones, {x, y, width, height})
+end
+
+function Map:getDeadzones()
+    return self.deadzones
 end
 
 function Map:draw()	   
@@ -90,15 +83,14 @@ function Map:draw()
 
     for y = yCoord, loopToY, self.tileheight do 
         for x = xCoord, loopToX, self.tilewidth do 
-            local quadNum = self:getTileQuad(x, y)
-            local a, b, c, d = unpack(self.quads[quadNum])
-            local quad = love.graphics.newQuad(a, b, c, d, self.image:getDimensions())
             local xDraw, yDraw
             
             if self.camX < self.positionX then xDraw = (x-self.camX) else xDraw = -xOffset+((xCount-1)*self.tilewidth) end
             if self.camY < self.positionY then yDraw = (y-self.camY) else yDraw = -yOffset+((yCount-1)*self.tileheight) end
             
-            love.graphics.draw(self.image, quad, xDraw, yDraw)
+            local quadNum = self:getTileQuad(x, y)
+
+            love.graphics.draw(self.image, self.quads[quadNum], xDraw, yDraw)
             xCount = xCount+1
         end
         xCount = 1

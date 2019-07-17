@@ -6,8 +6,8 @@ function generateQuads(image_path, tile_width, tile_height) --generate quads for
 	local rows = image:getHeight()/tile_height
 	local count = 1
 	for i = 1, rows do
-		for j = 1, cols do
-			quadMap[count] = {(j-1)*tile_width, (i-1)*tile_height, tile_width, tile_height} --gives the x, y, width, height needed to generate a quad
+		for j = 1, cols do --gives the x, y, width, height needed to generate a quad
+            quadMap[count] = love.graphics.newQuad((j-1)*tile_width, (i-1)*tile_height, tile_width, tile_height, image:getDimensions())
 			count = count + 1
 		end
 	end
@@ -40,6 +40,10 @@ function requireFiles(files)
         local f = file:sub(1, -5)
         require(f)
     end
+end
+
+function focusCoordsToCenter(x, y)
+    return x-(gw/2), y-(gh/2)
 end
     
     

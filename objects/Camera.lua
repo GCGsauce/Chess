@@ -1,21 +1,25 @@
-Camera = Object:extend()
+--require "objects.Entity"
+require "util"
+
+Camera = Entity:extend()
 
 --simply a camera that follows a specific entity and its movements.
-function Camera:new(entity)
-    self.x = entity:getPositionX()
-    self.y = entity:getPositionY()
+function Camera:new()
+    Camera.super.new(self)
 end
 
---attach camera to a specific entity, will focus on this entity and its movement 
-function Camera:attach(entity)
-
+function Camera:update(dt)
+    if self.entity then
+        self.positionX, self.positionY = focusCoordsToCenter(self.entity:getPosition()) end
 end
 
-function Camera:update()
+--places the camera at the center of the target entity
+function Camera:follow(entity)
+    self.entity = entity
 end
 
---centers the camera around specific coordinates
-function Camera:focus(x, y)
-    self.x = x-(gw/2)
-    self.y = x-(gh/2)
-end
+-- --centers the camera around specific coordinates
+-- function Camera:focus(x, y)
+--     self.positionX = x-(gw/2)
+--     self.positionY = x-(gh/2)
+-- end
