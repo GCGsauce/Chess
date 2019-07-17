@@ -13,11 +13,11 @@ function Entity:getPosition()
     if self.positionX and self.positionY then return self.positionX, self.positionY end
 end
 
-function Entity:getpositionX()
+function Entity:getPositionX()
     if self.positionX then return self.positionX end
 end
 
-function Entity:getpositionY()
+function Entity:getPositionY()
     if self.positionY then return self.positionY end
 end
 

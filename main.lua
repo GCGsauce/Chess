@@ -17,10 +17,11 @@ CURRENT_MAP = Map(MAP_DATA["cave"]) -- start in a cave
 
 function love.load()
 	GAME_CAMERA:follow(PROTAGONIST)
+	PROTAGONIST:setPosition(1, 1, CURRENT_MAP)
 end
 
 function love.update(dt)
-	CURRENT_MAP:update(dt)
+	--CURRENT_MAP:update(dt)
 	PROTAGONIST:update(dt)
 	GAME_CAMERA:update(dt)
 end
