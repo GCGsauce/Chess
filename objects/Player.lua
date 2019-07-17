@@ -1,7 +1,6 @@
 require "util"
 require "constants"
 require "objects.Camera"
-require "GameLoop"
 
 Player = Entity:extend()
 
