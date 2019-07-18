@@ -12,16 +12,9 @@ end
 function Camera:update(dt)
     if self.entity then
         self.positionX, self.positionY = focusCoordsToCenter(self.entity:getPosition()) end
-    print("CAMX: "..self.positionX.." CAMY: "..self.positionY)
 end
 
 --places the camera at the center of the target entity
 function Camera:follow(entity)
     self.entity = entity
 end
-
--- --centers the camera around specific coordinates
--- function Camera:focus(x, y)
---     self.positionX = x-(gw/2)
---     self.positionY = x-(gh/2)
--- end

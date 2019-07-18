@@ -3,7 +3,7 @@ require "constants"
 
 Map = Entity:extend()
 
-function Map:new(map_data, x, y, camX, camY, deadzones) --put in map data to get information about the map (table containing data about the map).	  
+function Map:new(map_data, x, y, camX, camY, deadzones, boundMap) --put in map data to get information about the map (table containing data about the map).	  
     Map.super.new(self, x, y)
 
 	if map_data then -- copies all of the data from map_data and makes it a member of the "map" data table
@@ -15,7 +15,7 @@ function Map:new(map_data, x, y, camX, camY, deadzones) --put in map data to get
 	self.image = love.graphics.newImage(self.tilesets[1].image:sub(4))
     self.camX = camX or 0 --the coordinates of the current view of the screen relative to the map. this is the "camera"
     self.camY = camY or 0
-    print("MAPPOSX: "..self.positionX.." MAPPOSY: "..self.positionY)
+    self.boundMap = boundMap or true --bound map means camera cannot pan into the outside portion of the map
     self.widthInPixels = self.tilewidth*self.width
     self.heightInPixels = self.tileheight*self.height
     self.deadzones = deadzones or {}

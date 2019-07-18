@@ -14,7 +14,6 @@ function Player:new()
     self.animQuads = generateQuads(self.image_path, self.playerWidth, self.playerHeight)
     self.currQuad = self.animQuads[9]
 
-    print("PLAYERPOSX: "..self.positionX.." PLAYERPOSY: "..self.positionY)
     INPUT:bind('right', 'MOVE_RIGHT')
     INPUT:bind('left', 'MOVE_LEFT')
     INPUT:bind('down', 'MOVE_DOWN')
@@ -24,10 +23,8 @@ end
 --sets the position of the player on the map
 function Player:setPosition(xTile, yTile, map_reference)
     --need to modify the tile position to have the player sprite sit at the foot of the tile
-    self.positionX = map_reference.positionX + ((xTile-1)*map_reference.tilewidth)
-    self.positionY = map_reference.positionY + ((yTile-1)*map_reference.tileheight) - 12
-
-    --print("POSX: "..self.positionX.." POSY: "..self.positionY)
+    self.positionX = map_reference.positionX + ((xTile-1)*map_reference.tilewidth)+(self.playerWidth/2)
+    self.positionY = map_reference.positionY + ((yTile-1)*map_reference.tileheight)
 end
 
 function Player:update(dt)
@@ -35,9 +32,7 @@ function Player:update(dt)
         self.positionX = self.positionX + 2
     elseif INPUT:down('MOVE_LEFT') then
         self.positionX = self.positionX - 2
-    end
-
-    if INPUT:down('MOVE_UP') then 
+    elseif INPUT:down('MOVE_UP') then 
         self.positionY = self.positionY - 2
     elseif INPUT:down('MOVE_DOWN') then
         self.positionY = self.positionY + 2
@@ -45,5 +40,5 @@ function Player:update(dt)
 end
 
 function Player:draw() --always render the player in the center of the screen
-    love.graphics.draw(self.image, self.currQuad, (gw/2), (gh/2))
+    love.graphics.draw(self.image, self.currQuad, (gw/2)-(self.playerWidth/2), (gh/2)-(self.playerHeight/2))
 end
