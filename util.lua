@@ -45,6 +45,10 @@ end
 function focusCoordsToCenter(x, y)
     return x-(gw/2), y-(gh/2)
 end
+
+function adjustToTileFoot(x, y)
+    
+end
     
     
     

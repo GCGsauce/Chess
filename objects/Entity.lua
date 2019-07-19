@@ -42,13 +42,12 @@ end
 
 function Entity:draw() --if no reference to map object exists then cannot draw the entity to the screen
     --draws a tile to the screen at the precise location in the world, should be on the map
-    print("YO: "..self.positionX)
-    print("WY: "..GAME_CAMERA.positionX)
 
     if self.positionX >= GAME_CAMERA.positionX and self.positionX < GAME_CAMERA.positionX + gw and
        self.positionY >= GAME_CAMERA.positionY and self.positionY < GAME_CAMERA.positionY+gh then 
-        print("wackawaya")
         local z, v = self.positionX-GAME_CAMERA.positionX, self.positionY - GAME_CAMERA.positionY
+        z = z + (abs(self.width - CURRENT_MAP.tilewidth)/2)
+        v = v + abs(self.height - CURRENT_MAP.tileheight)
         love.graphics.draw(love.graphics.newImage(self.image), self.quads[self.start_frame], z, v)
     end
 end

@@ -12,9 +12,9 @@ requireFiles(object_list)
 MAP_DATA 	= loadMaps() -- loads all data about maps
 INPUT 		= Input()
 GAME_CAMERA = Camera()
-CURRENT_MAP = Map(MAP_DATA["cave"]) -- start in a cave
-PROTAGONIST = Player({"images/walk_cycle.png", 16, 24, 9, 1, 1})
-ENEMY 		= Entity({"images/Pockmon.png", 8, 8, 1, 2, 1})
+CURRENT_MAP = Map(MAP_DATA["small_room"]) -- start in a cave
+PROTAGONIST = Player({"images/walk_cycle.png", 16, 24, 9, 1, 3})
+ENEMY 		= Entity({"images/Pockmon.png", 8, 8, 1, 4, 3})
 
 function love.load()
 	GAME_CAMERA:follow(PROTAGONIST)
