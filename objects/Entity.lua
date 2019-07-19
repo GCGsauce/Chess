@@ -22,14 +22,18 @@ function Entity:new(def)
     self.tileY = def[6]
 
     if self.tileX and self.tileY then 
-        self.positionX, self.positionY = CURRENT_MAP:getTileFoot(CURRENT_MAP:getTileCoords(self.tileX, self.tileY)) end
+        self.positionX, self.positionY = self:adjustToTileFoot(CURRENT_MAP:getTileCoords(self.tileX, self.tileY)) end
 end
 
 function Entity:setTilePosition(tileX, tileY)
     self.tileX = tileX 
     self.tileY = tileY
     --this is the cartesian coordinate position of the player in the world, informs the camera which regions of the map to illuminate
-    self.positionX, self.positionY = CURRENT_MAP:getTileFoot(CURRENT_MAP:getTileCoords(self.tileX, self.tileY))
+    self.positionX, self.positionY = self:adjustToTileFoot(CURRENT_MAP:getTileCoords(self.tileX, self.tileY))
+end 
+
+function Entity:adjustToTileFoot(x, y)
+    return x, y
 end
 
 function Entity:getPosition() --gets the cartesian coordinates of the entity
@@ -38,10 +42,14 @@ end
 
 function Entity:draw() --if no reference to map object exists then cannot draw the entity to the screen
     --draws a tile to the screen at the precise location in the world, should be on the map
+    print("YO: "..self.positionX)
+    print("WY: "..GAME_CAMERA.positionX)
+
     if self.positionX >= GAME_CAMERA.positionX and self.positionX < GAME_CAMERA.positionX + gw and
-       self.positionY >= GAME_CAMERA.positionY and self.positionY < GAME_CAMERA.positionY then 
+       self.positionY >= GAME_CAMERA.positionY and self.positionY < GAME_CAMERA.positionY+gh then 
+        print("wackawaya")
         local z, v = self.positionX-GAME_CAMERA.positionX, self.positionY - GAME_CAMERA.positionY
-        love.graphics.draw(self.image, self.quads[self.start_frame], z, v)
+        love.graphics.draw(love.graphics.newImage(self.image), self.quads[self.start_frame], z, v)
     end
 end
 

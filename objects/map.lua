@@ -28,9 +28,9 @@ function Map:getTileCoords(tileX, tileY)
     return self.positionX + ((tileX-1)*self.tilewidth), self.positionY + ((tileY-1)*self.tileheight)
 end
 
-function Map:getTileFoot(positionX, positionY)
-    return positionX + self.tilewidth, positionY
-end
+-- function Map:getTileFoot(positionX, positionY)
+--     return positionX, positionY
+-- end
 
 function Map:getTileQuad(x, y) -- x, y is in cart coords, return the number of the quad associated with this tile 
     --must find the tile number of the position with respect to the map

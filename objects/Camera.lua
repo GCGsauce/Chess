@@ -9,7 +9,10 @@ end
 
 function Camera:update(dt)
     if self.entity then
-        self.positionX, self.positionY = focusCoordsToCenter(self.entity:getPosition()) end
+        self.positionX, self.positionY = focusCoordsToCenter(self.entity.positionX, self.entity.positionY) 
+        self.positionX = self.positionX + (PROTAGONIST.width/2) --adjust for the fact we are centering the protagonist
+        self.positionY = self.positionY + (PROTAGONIST.height/2)
+    end
 end
 
 --places the camera at the center of the target entity
