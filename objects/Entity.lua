@@ -1,24 +1,48 @@
+require "util"
 
 local Entity = Object:extend()
 
-function Entity:new()
+-- local def =
+-- {
+-- image = "walk_cycle.png",
+-- width = 16,
+-- height = 24,
+-- startFrame = 9,
+-- tileX = 10,
+-- tileY = 2
+-- }
+
+function Entity:new(def)
+    self.image = def[1]
+    self.width = def[2]
+    self.height = def[3]
+    self.quads = generateQuads(self.image, self.width, self.height)
+    self.start_frame = def[4]
+    self.tileX = def[5]
+    self.tileY = def[6]
+
+    if self.tileX and self.tileY then 
+        self.positionX, self.positionY = CURRENT_MAP:getTileFoot(CURRENT_MAP:getTileCoords(self.tileX, self.tileY)) end
 end
 
-function Entity:new(x, y)
-    self.positionX = x or 0
-    self.positionY = y or 0
+function Entity:setTilePosition(tileX, tileY)
+    self.tileX = tileX 
+    self.tileY = tileY
+    --this is the cartesian coordinate position of the player in the world, informs the camera which regions of the map to illuminate
+    self.positionX, self.positionY = CURRENT_MAP:getTileFoot(CURRENT_MAP:getTileCoords(self.tileX, self.tileY))
 end
 
-function Entity:getPosition()
-    if self.positionX and self.positionY then return self.positionX, self.positionY end
+function Entity:getPosition() --gets the cartesian coordinates of the entity
+    return self.positionX, self.positionY
 end
 
-function Entity:getPositionX()
-    if self.positionX then return self.positionX end
-end
-
-function Entity:getPositionY()
-    if self.positionY then return self.positionY end
+function Entity:draw() --if no reference to map object exists then cannot draw the entity to the screen
+    --draws a tile to the screen at the precise location in the world, should be on the map
+    if self.positionX >= GAME_CAMERA.positionX and self.positionX < GAME_CAMERA.positionX + gw and
+       self.positionY >= GAME_CAMERA.positionY and self.positionY < GAME_CAMERA.positionY then 
+        local z, v = self.positionX-GAME_CAMERA.positionX, self.positionY - GAME_CAMERA.positionY
+        love.graphics.draw(self.image, self.quads[self.start_frame], z, v)
+    end
 end
 
 return Entity

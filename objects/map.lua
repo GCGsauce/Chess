@@ -1,20 +1,20 @@
 require "util"
 require "constants"
 
-Map = Entity:extend()
+Map = Object:extend()
 
-function Map:new(map_data, x, y, camX, camY, deadzones, boundMap) --put in map data to get information about the map (table containing data about the map).	  
-    Map.super.new(self, x, y)
-
+function Map:new(map_data, x, y, deadzones, boundMap) --put in map data to get information about the map (table containing data about the map).	  
 	if map_data then -- copies all of the data from map_data and makes it a member of the "map" data table
 		for k, v in pairs(map_data) do
 			self[k] = v
 		end
     end
     
+    self.positionX = x or 0
+    self.positionY = y or 0
 	self.image = love.graphics.newImage(self.tilesets[1].image:sub(4))
-    self.camX = camX or 0 --the coordinates of the current view of the screen relative to the map. this is the "camera"
-    self.camY = camY or 0
+    self.camX = GAME_CAMERA.positionX or 0 --the coordinates of the current view of the screen relative to the map. this is the "camera"
+    self.camY = GAME_CAMERA.positionY or 0
     self.boundMap = boundMap or true --bound map means camera cannot pan into the outside portion of the map
     self.widthInPixels = self.tilewidth*self.width
     self.heightInPixels = self.tileheight*self.height
@@ -22,6 +22,14 @@ function Map:new(map_data, x, y, camX, camY, deadzones, boundMap) --put in map d
 end
 
 function Map:update(dt) --adjusts the camera position.
+end
+
+function Map:getTileCoords(tileX, tileY)
+    return self.positionX + ((tileX-1)*self.tilewidth), self.positionY + ((tileY-1)*self.tileheight)
+end
+
+function Map:getTileFoot(positionX, positionY)
+    return positionX + self.tilewidth, positionY
 end
 
 function Map:getTileQuad(x, y) -- x, y is in cart coords, return the number of the quad associated with this tile 
@@ -53,8 +61,7 @@ function Map:draw()
     --get the starting cartesian coordinates of the first tile that can be seen on the screen
     local xOffset, yOffset = 0, 0 -- tile might need to be rendered a bit off-screen, need to apply offset
     local xCoord, yCoord --coordinates of the top left tile to be rendered
-    self.camX = GAME_CAMERA:getPositionX()
-    self.camY = GAME_CAMERA:getPositionY() 
+    self.camX, self.camY = GAME_CAMERA.positionX, GAME_CAMERA.positionY
     --condition where the top left tile of the camera still lies inside the map's confines
     if self.camX >= self.positionX and self.camX < self.positionX+(2*self.widthInPixels) then 
         xCoord = self.camX

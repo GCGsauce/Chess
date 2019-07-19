@@ -1,12 +1,10 @@
 --require "objects.Entity"
 require "util"
 
-Camera = Entity:extend()
+Camera = Object:extend()
 
 --simply a camera that follows a specific entity and its movements.
 function Camera:new()
-    Camera.super.new(self)
-
 end
 
 function Camera:update(dt)

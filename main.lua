@@ -12,12 +12,11 @@ requireFiles(object_list)
 MAP_DATA 	= loadMaps() -- loads all data about maps
 INPUT 		= Input()
 GAME_CAMERA = Camera()
-PROTAGONIST = Player()
 CURRENT_MAP = Map(MAP_DATA["cave"]) -- start in a cave
+PROTAGONIST = Player({"images/walk_cycle.png", 16, 24, 9, 16, 5})
 
 function love.load()
 	GAME_CAMERA:follow(PROTAGONIST)
-	PROTAGONIST:setPosition(16, 5, CURRENT_MAP)
 end
 
 function love.update(dt)
