@@ -1,4 +1,5 @@
-function generateQuads(image_path, tile_width, tile_height) --generate quads for an image for a selected tile size, e.g. 32x32, 64,32
+--generate quads for an image for a selected tile size, e.g. 32x32, 64,32
+function generateQuads(image_path, tile_width, tile_height) 
     local image = love.graphics.newImage(image_path)
 	local quadMap = {}
 
@@ -46,8 +47,12 @@ function focusCoordsToCenter(x, y)
     return x-(gw/2), y-(gh/2)
 end
 
-function adjustToTileFoot(x, y)
-    
+--fills a table full of the same element with length l 
+function fillRedundantTable(element, l)
+    t = {}
+    for i = 1, l do
+        table.insert(t, element)
+    end return t
 end
     
     

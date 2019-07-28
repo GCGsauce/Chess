@@ -1,4 +1,5 @@
 require "util"
+--require "StateManager"
 
 local Entity = Object:extend()
 
@@ -17,24 +18,35 @@ function Entity:new(def)
     self.width = def[2]
     self.height = def[3]
     self.quads = generateQuads(self.image, self.width, self.height)
-    self.start_frame = def[4]
+    self.curr_frame = def[4]
+    self.start_frame = self.curr_frame
     self.tileX = def[5]
     self.tileY = def[6]
 
     if self.tileX and self.tileY then 
-        self.positionX, self.positionY = self:adjustToTileFoot(CURRENT_MAP:getTileCoords(self.tileX, self.tileY)) end
+        self.positionX, self.positionY = CURRENT_MAP:getTileCoords(self.tileX, self.tileY) end
+    
+    -- all entities have an idle state and a movement state. each entity will have an input manager function that
+    -- decides what state the entity is currently in
+    
+    --self.state_manager = StateManager() --useless for the player class as I can bind buttons directly to actions
+    print("POSX: "..self.positionX.." POSY: "..self.positionY)
+end
+
+function Entity:update()
+end
+
+function Entity:move(x, y) -- controls movement for 1 frame so pass in how many pixels to move in either direction
+    self.positionX = self.positionX + x
+    self.positionY = self.positionY + y
 end
 
 function Entity:setTilePosition(tileX, tileY)
     self.tileX = tileX 
     self.tileY = tileY
     --this is the cartesian coordinate position of the player in the world, informs the camera which regions of the map to illuminate
-    self.positionX, self.positionY = self:adjustToTileFoot(CURRENT_MAP:getTileCoords(self.tileX, self.tileY))
+    self.positionX, self.positionY = CURRENT_MAP:getTileCoords(self.tileX, self.tileY)
 end 
-
-function Entity:adjustToTileFoot(x, y)
-    return x, y
-end
 
 function Entity:getPosition() --gets the cartesian coordinates of the entity
     return self.positionX, self.positionY
@@ -48,7 +60,7 @@ function Entity:draw() --if no reference to map object exists then cannot draw t
         local z, v = self.positionX-GAME_CAMERA.positionX, self.positionY - GAME_CAMERA.positionY
         z = z + (abs(self.width - CURRENT_MAP.tilewidth)/2)
         v = v + abs(self.height - CURRENT_MAP.tileheight)
-        love.graphics.draw(love.graphics.newImage(self.image), self.quads[self.start_frame], z, v)
+        love.graphics.draw(love.graphics.newImage(self.image), self.quads[self.curr_frame], z, v)
     end
 end
 
