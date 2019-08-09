@@ -1,5 +1,5 @@
 require "util"
-require "constants"
+require "Constants"
 
 Map = Object:extend()
 

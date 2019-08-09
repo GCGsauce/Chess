@@ -1,5 +1,4 @@
 require "util"
---require "StateManager"
 
 local Entity = Object:extend()
 
@@ -29,11 +28,11 @@ function Entity:new(def)
     -- all entities have an idle state and a movement state. each entity will have an input manager function that
     -- decides what state the entity is currently in
     
-    --self.state_manager = StateManager() --useless for the player class as I can bind buttons directly to actions
-    print("POSX: "..self.positionX.." POSY: "..self.positionY)
+    --self.current_state = 
 end
 
-function Entity:update()
+function Entity:update(dt)
+
 end
 
 function Entity:move(x, y) -- controls movement for 1 frame so pass in how many pixels to move in either direction

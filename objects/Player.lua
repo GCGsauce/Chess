@@ -1,7 +1,7 @@
 require "util"
-require "constants"
+require "Constants"
 require "objects.Camera"
-require "objects.Animation"
+require "utility.Animation"
 
 Player = Entity:extend()
 
@@ -13,6 +13,8 @@ function Player:new(def)
     move_right = Animation(self, {5, 6, 7, 8})
     move_down = Animation(self, {9, 10, 11, 12})
     move_left = Animation(self, {13, 14, 15, 16})
+
+    --movement_state_up = State(function() self:move(0, -1) end, move_up)
 
     self.curr_animation = nil
     INPUT:bind('right', 'MOVE_RIGHT')

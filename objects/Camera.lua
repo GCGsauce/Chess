@@ -1,4 +1,3 @@
---require "objects.Entity"
 require "util"
 
 Camera = Object:extend()
